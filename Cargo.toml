@@ -1,0 +1,10 @@
+[package]
+name = "rustmarks"
+version = "0.1.2"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.20", features = ["derive"] }
+eza = "0.20.5"
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+skim = "0.10.4"
