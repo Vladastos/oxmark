@@ -1,10 +1,11 @@
 [package]
 name = "rustmarks"
-version = "0.1.2"
+version = "RUSTMARKS_VERSION"
 edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
-eza = "0.20.5"
+nucleo-matcher = "0.3.1"
+ratatui = "0.29.0"
 rusqlite = { version = "0.32.1", features = ["bundled"] }
-skim = "0.10.4"
+tui-textarea = "0.7.0"

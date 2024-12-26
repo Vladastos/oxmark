@@ -1,19 +1,38 @@
-use std::path::PathBuf;
+use std::io::{Read, Write};
+
 use clap::{Parser, Subcommand};
-mod sqlite_repository;
+mod sqlite;
+mod ui;
 
 fn main() {
     let cli = Cli::parse();
+
+    let sqlite_service_result = sqlite::SqliteService::new();
+
+    if let Err(e) = sqlite_service_result {
+        println!("{}", e.message());
+        std::process::exit(1);
+    }
+    let sqlite_service = sqlite_service_result.unwrap();
+
+    let mut app = ui::App::new();
+
     match cli.command {
         Some(Commands::Add {
             path,
             name,
             description,
         }) => {
-            add_cmd(path, name, description);
+            sqlite_service.create(path, name, description).unwrap_or_else(|e| {
+                println!("{}", e.message());
+                std::process::exit(1);
+            });
         }
         Some(Commands::Delete { path}) => {
-            delete_cmd(path);
+            sqlite_service.delete(path).unwrap_or_else(|e| {
+                println!("{}", e.message());
+                std::process::exit(1);
+            });
         }
         Some(Commands::Update {
             id,
@@ -21,71 +40,82 @@ fn main() {
             name,
             description,
         }) => {
-            update_cmd(id, path, name, description);
+            sqlite_service.update(id, path, name, description).unwrap_or_else(|e| {
+                println!("{}", e.message());
+                std::process::exit(1);
+            });
         }
         Some(Commands::List { pathsonly }) => {
-            list(pathsonly);
+            sqlite_service.get_all(pathsonly).unwrap_or_else(|e| {
+                println!("{}", e.message());
+                std::process::exit(1);
+            });
         }
         Some(Commands::Command {}) => {
-            command();
+            app.run(true).unwrap_or_else(|e| {
+                println!("{}", e);
+                std::process::exit(1);
+            });
+        }
+        Some(Commands::Init {}) => {
+
+            let function_string = "\n# Rustmarks \nfunction bk() { if [ -z \"$1\" ]; then $(rustmarks command); else rustmarks \"$@\"; fi }";
+            
+            // Look for .bashrc or .zshrc
+            let home = std::env::var("HOME").unwrap_or("/home".to_string());
+            let bashrc = format!("{}/.bashrc", home);
+            let zshrc = format!("{}/.zshrc", home);
+            let bashrc_exists = std::path::Path::new(&bashrc).exists();
+            let zshrc_exists = std::path::Path::new(&zshrc).exists();
+
+            // TODO: Check if line already exists first
+
+            if bashrc_exists {
+
+                let mut file = std::fs::OpenOptions::new()
+                    .append(true).read(true)
+                    .open(&bashrc)
+                    .unwrap();
+                
+                let mut buf = String::new(); 
+                file.read_to_string(&mut buf).unwrap();
+
+                if !buf.contains(function_string){
+                    println!("Adding line to .bashrc");
+                    file.write_all(function_string.as_bytes()).unwrap();
+                } else {
+                    println!("Line already exists in .bashrc");
+                }
+
+            } 
+            if zshrc_exists {
+                
+                let mut file = std::fs::OpenOptions::new()
+                    .append(true).read(true)
+                    .open(&zshrc)
+                    .unwrap();
+
+                let mut buf = String::new();
+                file.read_to_string(&mut buf).unwrap();
+
+                if !buf.contains(function_string){
+                    println!("Adding line to .zshrc");
+                    file.write_all(function_string.as_bytes()).unwrap();
+                } else {
+                    println!("Line already exists in .zshrc");
+                }
+
+            }
+            println!("Done. After restarting your terminal use bk command to start using rustmarks");
+            
         }
         None => {
-            default();
+            app.run(false).unwrap_or_else(|e| {
+                println!("{}", e);
+                std::process::exit(1);
+            });
         }
     }
-}
-
-/*
- * Commands
- */
-
-fn add_cmd(path: String, name: Option<String>, description: Option<String>) {
-    println!("Adding bookmark: {} {} {}", path, name.clone().unwrap_or("".to_string()), description.clone().unwrap_or("".to_string()));
-    let repo = sqlite_repository::SqliteRepository::new();
-    let bookmark = sqlite_repository::Bookmark {
-        id: 0,
-        name: name.clone(),
-        path: Some(path),
-        description: description,
-    };
-    let result = repo.add_bookmark(bookmark);
-    if let Err(e) = result {
-        println!("Error: {}", e);
-        return;
-    }
-}
-
-fn delete_cmd(path: String) {
-    println!("Removing bookmark: {}", path);
-}
-
-fn update_cmd(id: i32, path: Option<String>, name: Option<String>, description: Option<String>) {
-    println!("Updating bookmark: {} {} {} {}", id, path.unwrap_or("".to_string()), name.unwrap_or("".to_string()), description.unwrap_or("".to_string()));
-}
-
-fn list(pathsonly: bool) {
-
-    let repo = sqlite_repository::SqliteRepository::new();
-    let result = repo.list_bookmarks();
-
-    if let Err(e) = result {
-        println!("Error: {}", e);
-        return;
-    }
-
-    let bookmarks = result.unwrap();
-
-    println!("Number of bookmarks: {}", bookmarks.len());
-    
-    // TODO: Print the bookmarks
-}
-
-fn command() {
-    println!("Printing command");
-}
-
-fn default() {
-    list(false);
 }
 
 /*
@@ -97,10 +127,6 @@ fn default() {
 pub struct Cli {
     /// Optional name to operate on
     name: Option<String>,
-
-    /// Sets a custom config file
-    #[arg(short, long, value_name = "FILE")]
-    config: Option<PathBuf>,
 
     /// Turn debugging information on
     #[arg(short, long, action = clap::ArgAction::Count)]
@@ -118,17 +144,15 @@ pub enum Commands {
         path: String,
 
         /// The name of the bookmark
-        #[arg(short, long)]
         name: Option<String>,
 
         /// The description of the bookmark
-        #[arg(short, long)]
         description: Option<String>,
     },
 
     // Delete a bookmark
     Delete {
-        /// The id of the bookmark
+        /// The path of the bookmark
         path: String,
     },
 
@@ -157,4 +181,86 @@ pub enum Commands {
 
     // Print the command for selected bookmark
     Command {},
+
+    // Initialize rustmarks
+    Init {},
+}
+
+
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Bookmark {
+    pub id: Option<i32>,
+    pub name: Option<String>,
+    pub path: Option<String>,
+    pub description: Option<String>,
+}
+impl Bookmark {
+    pub fn new(
+        name: Option<String>,
+        path: Option<String>,
+        description: Option<String>,
+    ) -> Bookmark {
+        // Canonicalize the path, meaning that it will be an absolute path
+        let abs_path = if let Some(path) = path {
+            std::path::PathBuf::from(path)
+                .canonicalize()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string()
+        } else {
+            "".to_string()
+        };
+
+        Bookmark {
+            id: None,
+            name,
+            path: Some(abs_path),
+            description,
+        }
+    }
+
+    pub fn update(
+        &mut self,
+        name: Option<String>,
+        path: Option<String>,
+        description: Option<String>,
+    ) {
+        if name.is_some() {
+            self.name = name;
+        }
+        if path.is_some() {
+            self.path = path;
+        }
+        if description.is_some() {
+            self.description = description;
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        let id = if self.id.is_none() {
+            "None".to_string()
+        } else {
+            self.id.unwrap().to_string()
+        };
+        let name = self.name.clone().unwrap_or("None".to_string());
+        let path = self.path.clone().unwrap_or("None".to_string());
+        let description = self.description.clone().unwrap_or("None".to_string());
+        format!(
+            "id: {}, name: {}, path: {}, description: {}",
+            id, name, path, description
+        )
+    }
+}
+
+impl Default for Bookmark {
+    fn default() -> Self {
+        Bookmark {
+            id: None,
+            name: None,
+            path: None,
+            description: None,
+        }
+    }
 }
