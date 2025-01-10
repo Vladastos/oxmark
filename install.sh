@@ -21,6 +21,8 @@ function apt_install() {
     # Add promptorium gpg key if it doesn't exist
     if [[ ! -f /etc/apt/keyrings/promptorium-gpg.public ]]; then
         echo "Adding promptorium gpg key..."
+        sudo mkdir -p /etc/apt/keyrings
+        sudo chmod 700 /etc/apt/keyrings
         local gpg_key
         gpg_key=$(curl -s https://apt.promptorium.org/gpg-key.public)
         echo "$gpg_key" | sudo tee /etc/apt/keyrings/promptorium-gpg.public > /dev/null
