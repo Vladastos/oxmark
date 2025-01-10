@@ -91,4 +91,4 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          bash /home/${{ secrets.REMOTE_USER }}/rustmarks/scripts/update-apt-repo.bash
+          bash /home/${{ secrets.REMOTE_USER }}/rustmarks/scripts/update-apt-repo.sh
