@@ -22,7 +22,7 @@ function apt_install() {
     if [[ ! -f /etc/apt/keyrings/promptorium-gpg.public ]]; then
         echo "Adding promptorium gpg key..."
         sudo mkdir -p /etc/apt/keyrings
-        sudo chmod 700 /etc/apt/keyrings
+        sudo chmod 755 /etc/apt/keyrings
         local gpg_key
         gpg_key=$(curl -s https://apt.promptorium.org/gpg-key.public)
         echo "$gpg_key" | sudo tee /etc/apt/keyrings/promptorium-gpg.public > /dev/null
@@ -42,7 +42,7 @@ function apt_install() {
         echo "promptorium apt repository already exists"
     fi
 
-    # Install promptorium
+    # Install rustmarks
     echo "Updating apt repositories..."
     sudo apt update
     sudo apt install rustmarks -y
