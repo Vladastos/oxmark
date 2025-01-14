@@ -23,12 +23,14 @@ fn main() {
             name,
             description,
         }) => {
-            sqlite_service.create(path, name, description).unwrap_or_else(|e| {
-                println!("{}", e.message());
-                std::process::exit(1);
-            });
+            sqlite_service
+                .create(path, name, description)
+                .unwrap_or_else(|e| {
+                    println!("{}", e.message());
+                    std::process::exit(1);
+                });
         }
-        Some(Commands::Delete { path}) => {
+        Some(Commands::Delete { path }) => {
             sqlite_service.delete(path).unwrap_or_else(|e| {
                 println!("{}", e.message());
                 std::process::exit(1);
@@ -40,10 +42,12 @@ fn main() {
             name,
             description,
         }) => {
-            sqlite_service.update(id, path, name, description).unwrap_or_else(|e| {
-                println!("{}", e.message());
-                std::process::exit(1);
-            });
+            sqlite_service
+                .update(id, path, name, description)
+                .unwrap_or_else(|e| {
+                    println!("{}", e.message());
+                    std::process::exit(1);
+                });
         }
         Some(Commands::List { pathsonly }) => {
             sqlite_service.get_all(pathsonly).unwrap_or_else(|e| {
@@ -58,9 +62,8 @@ fn main() {
             });
         }
         Some(Commands::Init {}) => {
+            let function_string = "\n# Rustmarks \nfunction bk() { if [ -z \"$1\" ]; then \"$(rustmarks command)\"; else rustmarks \"$@\"; fi }";
 
-            let function_string = "\n# Rustmarks \nfunction bk() { if [ -z \"$1\" ]; then $(rustmarks command); else rustmarks \"$@\"; fi }";
-            
             // Look for .bashrc or .zshrc
             let home = std::env::var("HOME").unwrap_or("/home".to_string());
             let bashrc = format!("{}/.bashrc", home);
@@ -71,43 +74,42 @@ fn main() {
             // TODO: Check if line already exists first
 
             if bashrc_exists {
-
                 let mut file = std::fs::OpenOptions::new()
-                    .append(true).read(true)
+                    .append(true)
+                    .read(true)
                     .open(&bashrc)
                     .unwrap();
-                
-                let mut buf = String::new(); 
+
+                let mut buf = String::new();
                 file.read_to_string(&mut buf).unwrap();
 
-                if !buf.contains(function_string){
+                if !buf.contains(function_string) {
                     println!("Adding line to .bashrc");
                     file.write_all(function_string.as_bytes()).unwrap();
                 } else {
                     println!("Line already exists in .bashrc");
                 }
-
-            } 
+            }
             if zshrc_exists {
-                
                 let mut file = std::fs::OpenOptions::new()
-                    .append(true).read(true)
+                    .append(true)
+                    .read(true)
                     .open(&zshrc)
                     .unwrap();
 
                 let mut buf = String::new();
                 file.read_to_string(&mut buf).unwrap();
 
-                if !buf.contains(function_string){
+                if !buf.contains(function_string) {
                     println!("Adding line to .zshrc");
                     file.write_all(function_string.as_bytes()).unwrap();
                 } else {
                     println!("Line already exists in .zshrc");
                 }
-
             }
-            println!("Done. After restarting your terminal use bk command to start using rustmarks");
-            
+            println!(
+                "Done. After restarting your terminal use bk command to start using rustmarks"
+            );
         }
         None => {
             app.run(false).unwrap_or_else(|e| {
@@ -185,8 +187,6 @@ pub enum Commands {
     // Initialize rustmarks
     Init {},
 }
-
-
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Bookmark {

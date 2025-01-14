@@ -16,8 +16,6 @@ pub struct SqliteService {
 }
 
 impl SqliteService {
-
-
     pub fn new() -> Result<SqliteService, SqliteServiceError> {
         let result = SqliteRepository::new();
 
@@ -37,7 +35,9 @@ impl SqliteService {
         let bookmark = Bookmark::new(name, Some(path), description);
 
         // Check if a bookmark with the same path already exists
-        let check_bookmark = self.sqlite_repository.get_bookmark_by_path(bookmark.path.clone().unwrap());
+        let check_bookmark = self
+            .sqlite_repository
+            .get_bookmark_by_path(bookmark.path.clone().unwrap());
         if let Ok(_) = check_bookmark {
             return Err(SqliteServiceError::BookmarkAlreadyExists);
         }
@@ -48,7 +48,6 @@ impl SqliteService {
         Ok(())
     }
     pub fn delete(&self, path: String) -> Result<(), SqliteServiceError> {
-
         // TODO: handle canonicalize errors
 
         let abs_path = std::path::PathBuf::from(path.clone())
@@ -58,9 +57,7 @@ impl SqliteService {
             .unwrap()
             .to_string();
 
-        let bookmark_result = self
-            .sqlite_repository
-            .get_bookmark_by_path(abs_path);
+        let bookmark_result = self.sqlite_repository.get_bookmark_by_path(abs_path);
 
         if let Err(_) = bookmark_result {
             return Err(SqliteServiceError::PathNotFound(path));
@@ -110,7 +107,7 @@ impl SqliteService {
         //  Get the bookmark by id
         let result = self.sqlite_repository.get_bookmark(id);
         if let Err(_) = result {
-            return Err(SqliteServiceError::IdNotFound(id));   
+            return Err(SqliteServiceError::IdNotFound(id));
         }
 
         let mut bookmark = result.unwrap();
@@ -128,10 +125,13 @@ impl SqliteService {
     }
 
     pub fn get_all(&self, pathsonly: bool) -> Result<(), SqliteServiceError> {
-        let bookmarks = self.sqlite_repository.get_all_bookmarks().unwrap_or_else(|e| {
-            println!("{}", e);
-            std::process::exit(1);
-        });
+        let bookmarks = self
+            .sqlite_repository
+            .get_all_bookmarks()
+            .unwrap_or_else(|e| {
+                println!("{}", e);
+                std::process::exit(1);
+            });
 
         // If pathsonly is true, print only the paths
         if pathsonly {
@@ -166,7 +166,9 @@ pub enum SqliteServiceError {
 impl SqliteServiceError {
     pub fn message(&self) -> String {
         match self {
-            SqliteServiceError::PathNotFound(path) => format!("Bookmark with path {} not found", path),
+            SqliteServiceError::PathNotFound(path) => {
+                format!("Bookmark with path {} not found", path)
+            }
             SqliteServiceError::IdNotFound(id) => format!("Bookmark with id {} not found", id),
             SqliteServiceError::BookmarkAlreadyExists => "Bookmark already exists".to_string(),
             SqliteServiceError::InternalError => "Internal error".to_string(),
@@ -180,7 +182,6 @@ impl std::fmt::Display for SqliteServiceError {
     }
 }
 impl std::error::Error for SqliteServiceError {}
-    
 
 /*
  *
@@ -188,26 +189,22 @@ impl std::error::Error for SqliteServiceError {}
  *
  */
 
- #[derive(Debug)]
+#[derive(Debug)]
 pub struct SqliteRepository {
     conn: Connection,
 }
 
 impl SqliteRepository {
     pub fn new() -> Result<SqliteRepository, SqliteRepositoryError> {
-
-        
         // Get the $HOME environment variable
         let home_dir = std::env::var("HOME").unwrap();
         let db_dir_path = std::path::Path::new(&home_dir).join(DATABASE_DIR);
         let db_path = std::path::Path::new(&db_dir_path).join(DATABASE_NAME);
-            
 
         let mut result = Connection::open(db_path.clone());
-        
+
         // If the connection failed, try to create the database file
         if let Err(_) = result {
-
             std::fs::create_dir_all(db_dir_path).unwrap();
             if !std::path::Path::new(&db_path).exists() {
                 let file_creation_result = std::fs::File::create(db_path.clone());
@@ -216,20 +213,18 @@ impl SqliteRepository {
                 }
 
                 result = Connection::open(db_path);
-
             }
         }
-        
+
         // If the connection failed, return an error
         if let Err(_) = result {
             return Err(SqliteRepositoryError::ConnectionError);
         }
 
-
         let conn = result.unwrap();
 
         // Create the table if it doesn't exist
-        let query_result =conn.execute(
+        let query_result = conn.execute(
             "CREATE TABLE IF NOT EXISTS bookmarks (
                 id INTEGER PRIMARY KEY,
                 name TEXT,
@@ -297,7 +292,11 @@ impl SqliteRepository {
         Ok(())
     }
 
-    pub fn update_bookmark(&self, id: i32, bookmark: Bookmark) -> Result<(), SqliteRepositoryError> {
+    pub fn update_bookmark(
+        &self,
+        id: i32,
+        bookmark: Bookmark,
+    ) -> Result<(), SqliteRepositoryError> {
         let mut stmt = self
             .conn
             .prepare("UPDATE bookmarks SET name = ?, path = ?, description = ? WHERE id = ?")?;
@@ -316,7 +315,6 @@ impl SqliteRepository {
         Ok(())
     }
 }
-
 
 //
 // SqliteRepositoryError
@@ -346,8 +344,7 @@ impl SqliteRepositoryError {
 impl std::fmt::Display for SqliteRepositoryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "rustmarks - SqliteRepositoryError: {}", self.message())
-    } 
-    
+    }
 }
 
 impl From<rusqlite::Error> for SqliteRepositoryError {

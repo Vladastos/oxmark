@@ -1,11 +1,18 @@
 use crate::sqlite::SqliteRepository;
 use ratatui::{
-    crossterm::{cursor, event::{self, Event, KeyCode}, execute, terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}},
+    crossterm::{
+        cursor,
+        event::{self, Event, KeyCode},
+        execute,
+        terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    },
     layout::Flex,
     prelude::{Constraint, CrosstermBackend, Layout},
 };
 use std::{
-    cmp::{max, min}, io, time::Duration
+    cmp::{max, min},
+    io,
+    time::Duration,
 };
 use tui_textarea::TextArea;
 
@@ -82,14 +89,15 @@ impl App {
     }
 
     pub fn run(&mut self, print_command: bool) -> Result<(), AppError> {
-
         let mut terminal = self.init_terminal();
-        
+
         // Get the list of bookmarks from the sqlite repository
         let bookmark_list_result = self.sqlite_repository.get_all_bookmarks();
         if let Err(_) = bookmark_list_result {
             self.restore(terminal);
-            return Err(AppError::InternalError("Error while getting bookmarks".to_string()));
+            return Err(AppError::InternalError(
+                "Error while getting bookmarks".to_string(),
+            ));
         }
 
         self.bookmarks = Option::from(bookmark_list_result.unwrap());
@@ -99,7 +107,6 @@ impl App {
 
         // Initialize the selected bookmark
         self.update_selected_bookmark();
-
 
         // Start the main loop
         while self.running_state != RunningState::Done && self.running_state != RunningState::Exited
@@ -329,24 +336,23 @@ impl App {
 
     fn delete_selected_bookmark(&mut self) {
         self.sqlite_repository
-        .delete_bookmark(
-            self.deleting_state
-                .as_ref()
-                .unwrap()
-                .bookmark
-                .as_ref()
-                .unwrap()
-                .id
-                .unwrap(),
-        )
-        .unwrap();
+            .delete_bookmark(
+                self.deleting_state
+                    .as_ref()
+                    .unwrap()
+                    .bookmark
+                    .as_ref()
+                    .unwrap()
+                    .id
+                    .unwrap(),
+            )
+            .unwrap();
     }
 
     fn increment_selection_index(&mut self) {
         let bookmark_count = self.filtered_bookmarks.as_ref().unwrap().len() as i32;
-                    let selection_index = self.selection_index.unwrap();
-                    self.selection_index =
-                        Option::from(min(selection_index + 1, bookmark_count - 1));
+        let selection_index = self.selection_index.unwrap();
+        self.selection_index = Option::from(min(selection_index + 1, bookmark_count - 1));
     }
 
     fn decrement_selection_index(&mut self) {
@@ -358,23 +364,26 @@ impl App {
     // Exit handler
     //
     fn handle_exit(&mut self, print_command: bool) {
-
         if self.selected_bookmark.is_none() {
             return;
         }
 
-        let bookmark_path = self.selected_bookmark.as_ref().unwrap().path.clone().unwrap();
+        let bookmark_path = self
+            .selected_bookmark
+            .as_ref()
+            .unwrap()
+            .path
+            .clone()
+            .unwrap();
 
         if self.running_state == RunningState::Done {
-            
             if print_command {
-
                 let is_directory = std::path::Path::new(&bookmark_path).is_dir();
 
                 let is_file = std::path::Path::new(&bookmark_path).is_file();
 
                 let editor = std::env::var("EDITOR").unwrap_or("vi".to_string());
-                
+
                 let command = if is_directory {
                     format!("cd {}", bookmark_path)
                 } else if is_file {
@@ -384,7 +393,6 @@ impl App {
                 };
 
                 println!("{}", command);
-
             } else {
                 println!("{}", bookmark_path);
             }
@@ -395,31 +403,26 @@ impl App {
     // Terminal helpers
     //
     fn init_terminal(&mut self) -> ratatui::Terminal<CrosstermBackend<io::Stderr>> {
-        
-        let mut terminal = ratatui::Terminal::new(CrosstermBackend::new(std::io::stderr())).unwrap();
-    
+        let mut terminal =
+            ratatui::Terminal::new(CrosstermBackend::new(std::io::stderr())).unwrap();
+
         // TODO: handle errors
         enable_raw_mode().unwrap();
 
-        execute!(
-            terminal.backend_mut(),
-            EnterAlternateScreen
-        ).unwrap();
-        
+        execute!(terminal.backend_mut(), EnterAlternateScreen).unwrap();
+
         terminal.clear().unwrap();
 
         execute!(terminal.backend_mut(), cursor::Hide).unwrap();
-        terminal 
+        terminal
     }
 
     fn restore(&mut self, mut terminal: ratatui::Terminal<CrosstermBackend<io::Stderr>>) {
-        
         // TODO: handle errors
         disable_raw_mode().unwrap();
 
         execute!(terminal.backend_mut(), cursor::Show).unwrap();
         execute!(terminal.backend_mut(), LeaveAlternateScreen).unwrap();
-
     }
 }
 
@@ -451,7 +454,7 @@ pub enum AppError {
 impl AppError {
     pub fn message(&self) -> String {
         match self {
-            AppError::InternalError(message) =>format!("Internal error: {}", message),
+            AppError::InternalError(message) => format!("Internal error: {}", message),
         }
     }
 }

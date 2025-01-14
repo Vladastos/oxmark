@@ -1,15 +1,13 @@
 use crate::ui::App;
 
-use ratatui::widgets::{Block, Paragraph,Clear,BorderType};
-use ratatui::prelude::Constraint;
 use ratatui::layout::Flex;
-use ratatui::style::{Color, Style};
+use ratatui::prelude::Constraint;
 use ratatui::prelude::Layout;
+use ratatui::style::{Color, Style};
+use ratatui::widgets::{Block, BorderType, Clear, Paragraph};
 
 pub fn render(app: &App, popup_area: ratatui::layout::Rect, frame: &mut ratatui::Frame) {
-
-    let block =
-        Block::bordered().border_type(BorderType::Rounded);
+    let block = Block::bordered().border_type(BorderType::Rounded);
 
     // Create the "Yes" and "No" buttons
     let yes_button_text = "Yes";
@@ -49,7 +47,7 @@ pub fn render(app: &App, popup_area: ratatui::layout::Rect, frame: &mut ratatui:
     };
 
     // Create the title paragraph
-    let title_text = "Are you sure you want to delete bookmark? ".to_string() +" (y/N)";
+    let title_text = "Are you sure you want to delete bookmark? ".to_string() + " (y/N)";
     let title = Paragraph::new(title_text.clone())
         .block(Block::default())
         .centered();
