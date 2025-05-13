@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'rustmarks'",
+            "name": "Debug executable 'oxmark'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=rustmarks",
-                    "--package=rustmarks"
+                    "--bin=oxmark",
+                    "--package=oxmark"
                 ],
                 "filter": {
-                    "name": "rustmarks",
+                    "name": "oxmark",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'rustmarks'",
+            "name": "Debug unit tests in executable 'oxmark'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=rustmarks",
-                    "--package=rustmarks"
+                    "--bin=oxmark",
+                    "--package=oxmark"
                 ],
                 "filter": {
-                    "name": "rustmarks",
+                    "name": "oxmark",
                     "kind": "bin"
                 }
             },

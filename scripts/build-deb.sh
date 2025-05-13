@@ -3,8 +3,8 @@
 set -e
 
 checks(){
-    if [ -z "$RUSTMARKS_VERSION" ]; then
-        echo "Please set RUSTMARKS_VERSION."
+    if [ -z "$OXMARK_VERSION" ]; then
+        echo "Please set OXMARK_VERSION."
         exit 1
     fi
 }
@@ -15,11 +15,11 @@ function main() {
 }
 
 function create_deb_package() {
-    local deb_directory="./target/deb/rustmarks_"$RUSTMARKS_VERSION"-1_amd64"
+    local deb_directory="./target/deb/oxmark_"$OXMARK_VERSION"-1_amd64"
     mkdir -p "$deb_directory/DEBIAN"
     mkdir -p "$deb_directory/usr/bin"
 
-    cp "target/release/rustmarks" "$deb_directory/usr/bin/rustmarks"
+    cp "target/release/oxmark" "$deb_directory/usr/bin/oxmark"
 
     create_control_file $deb_directory
 
@@ -30,12 +30,12 @@ function create_deb_package() {
 function create_control_file() {
     local deb_directory=$1
 
-    echo "Package: rustmarks
-Version: $RUSTMARKS_VERSION
+    echo "Package: oxmark
+Version: $OXMARK_VERSION
 Maintainer: Vladislav Parfeniuc
-Homepage: https://github.com/Promptorium/rustmarks
+Homepage: https://github.com/Promptorium/oxmark
 Architecture: amd64
-Description: Rustmarks is a simple bookmark manager written in Rust.
+Description: Oxmark is a simple bookmark manager written in Rust.
 " > "$deb_directory/DEBIAN/control"
 
 }

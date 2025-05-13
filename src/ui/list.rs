@@ -10,7 +10,7 @@ use ratatui::widgets::{Block, Borders, ListItem, Paragraph};
 
 const DEFAULT_BLOCK: ratatui::widgets::Block =
     ratatui::widgets::Block::bordered().border_type(ratatui::widgets::BorderType::Rounded);
-const TITLE: &str = "Rustmarks";
+const TITLE: &str = "Oxmark";
 const BOOKMARK_TITLE_WIDTH: usize = 20;
 
 pub fn render(app: &App, frame: &mut ratatui::Frame) {

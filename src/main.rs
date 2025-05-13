@@ -62,7 +62,7 @@ fn main() {
             });
         }
         Some(Commands::Init {}) => {
-            let function_string = "\n# Rustmarks \nfunction bk() { if [ -z \"$1\" ]; then \"$(rustmarks command)\"; else rustmarks \"$@\"; fi }";
+            let function_string = "\n# Oxmark \nfunction ox() { if [ -z \"$1\" ]; then \"$(oxmark command)\"; else oxmark \"$@\"; fi }";
 
             // Look for .bashrc or .zshrc
             let home = std::env::var("HOME").unwrap_or("/home".to_string());
@@ -108,7 +108,7 @@ fn main() {
                 }
             }
             println!(
-                "Done. After restarting your terminal use bk command to start using rustmarks"
+                "Done. After restarting your terminal use ox command to start using oxmark"
             );
         }
         None => {
@@ -184,7 +184,7 @@ pub enum Commands {
     // Print the command for selected bookmark
     Command {},
 
-    // Initialize rustmarks
+    // Initialize oxmark
     Init {},
 }
 

@@ -2,9 +2,9 @@
 
 function main(){
     
-    # Check if rustmarks is already installed
-    if  command -v rustmarks >/dev/null; then
-        echo "Rustmarks is already installed"
+    # Check if oxmark is already installed
+    if  command -v oxmark >/dev/null; then
+        echo "Oxmark is already installed"
         exit 0
     fi
 
@@ -42,19 +42,19 @@ function apt_install() {
         echo "promptorium apt repository already exists"
     fi
 
-    # Install rustmarks
+    # Install oxmark
     echo "Updating apt repositories..."
     sudo apt update
-    sudo apt install rustmarks -y
+    sudo apt install oxmark -y
 
 }
 
 function generic_install() {
 
-    echo "Installing Rustmarks..."
+    echo "Installing Oxmark..."
     
     local url
-    url=$(curl https://api.github.com/repos/Promptorium/rustmarks/releases/latest \
+    url=$(curl https://api.github.com/repos/Promptorium/oxmark/releases/latest \
     | grep "browser_download_url.*linux_amd64" | cut -d : -f 2,3 | tr -d \" )
     
     if [[ -z $url ]]; then
@@ -62,11 +62,11 @@ function generic_install() {
         exit 1
     fi
 
-    echo "Downloading rustmarks binary..."
-    sudo wget -O /usr/local/bin/rustmarks $url
-    sudo chmod +x /usr/local/bin/rustmarks
+    echo "Downloading oxmark binary..."
+    sudo wget -O /usr/local/bin/oxmark $url
+    sudo chmod +x /usr/local/bin/oxmark
 
-    echo "Rustmarks installed successfully"
+    echo "Oxmark installed successfully"
 
 }
 

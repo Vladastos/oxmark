@@ -551,7 +551,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustmarks"
+name = "oxmark"
 version = "0.1.3"
 dependencies = [
  "clap",

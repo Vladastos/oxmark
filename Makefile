@@ -1,4 +1,4 @@
-APP_NAME = rustmarks
+APP_NAME = oxmark
 DESTDIR = /usr/local/bin
 
 
@@ -9,7 +9,7 @@ install: build
 	sudo cp target/release/$(APP_NAME) $(DESTDIR)/$(APP_NAME)
 
 install-deb: build-deb
-	sudo apt install --reinstall -y --allow-downgrades ./target/deb/rustmarks*.deb
+	sudo apt install --reinstall -y --allow-downgrades ./target/deb/oxmark*.deb
 
 build: fmt
 	bash scripts/build.sh

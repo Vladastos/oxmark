@@ -2,8 +2,8 @@ use rusqlite::Connection;
 
 use super::Bookmark;
 
-const DATABASE_DIR: &str = ".local/share/rustmarks";
-const DATABASE_NAME: &str = "rustmarks.db";
+const DATABASE_DIR: &str = ".local/share/oxmark";
+const DATABASE_NAME: &str = "oxmark.db";
 
 /*
  *
@@ -178,7 +178,7 @@ impl SqliteServiceError {
 
 impl std::fmt::Display for SqliteServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "rustmarks - SqliteServiceError: {}", self.message())
+        write!(f, "oxmark - SqliteServiceError: {}", self.message())
     }
 }
 impl std::error::Error for SqliteServiceError {}
@@ -343,7 +343,7 @@ impl SqliteRepositoryError {
 
 impl std::fmt::Display for SqliteRepositoryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "rustmarks - SqliteRepositoryError: {}", self.message())
+        write!(f, "oxmark - SqliteRepositoryError: {}", self.message())
     }
 }
 
