@@ -108,7 +108,7 @@ fn main() {
                 }
             }
             println!(
-                "Done. After restarting your terminal use ox command to start using oxmark"
+                "Done. After restarting your terminal use the 'ox' command to start using oxmark"
             );
         }
         None => {
